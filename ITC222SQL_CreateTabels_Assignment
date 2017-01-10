@@ -1,0 +1,73 @@
+Use MetroAlt
+Go
+
+create table BusService
+(
+	id_BusService int identity(1,1) primary key,
+	BusServiceName nvarchar(255) not null,
+	BusServiceDescription nvarchar(255) null,
+)
+
+create table Maintenance
+(
+	id_Maintenance int identity(1,1) primary key,
+	MaintenanceDate DATE not null,
+	id_BusService int not null foreign key references BusService(id_BusService),
+)
+
+create table MaintenanceDetail
+(
+	id_MaintenanceDetail int identity(1,1),
+	id_Maintenance int not null foreign key references Maintenance(id_Maintenance),
+	id_Employee int not null foreign key references Employee(EmployeeKey),
+	id_BusService int not null foreign key references BusService(id_BusService),
+	MaintenanceNotes nvarchar(255) null,
+)
+
+alter table MaintenanceDetail drop constraint FK__Maintenan__id_Bu__6383C8BA
+alter table MaintenanceDetail drop constraint FK__Maintenan__id_Em__628FA481
+alter table MaintenanceDetail drop constraint FK__Maintenan__id_Ma__619B8048
+
+alter table MaintenanceDetail drop constraint PK__Maintena__9EA521FCD480F07C
+
+alter table MaintenanceDetail
+add constraint PK_id_MaintenanceDetail primary key (id_Maintenance)
+
+alter table MaintenanceDetail
+add constraint FK_id_Maintenance_1 foreign key (id_Maintenance)
+references Maintenance(id_Maintenance)
+
+alter table MaintenanceDetail
+add constraint FK_id_Employee_1 foreign key (id_Employee)
+references Employee(EmployeeKey)
+
+alter table MaintenanceDetail
+add constraint FK_id_BusService_1 foreign key (id_BusService)
+references BusService(id_BusService)
+
+alter table Bustype
+add BusTypeAccessible bit
+
+alter table Employee
+add unique (EmployeeEmail)
+
+alter table Employee
+drop constraint UQ__Employee__6E8498AAACFE5855
+
+alter table Employee
+add constraint UQ_EmployeeEamil_1 unique (EmployeeEmail)
+
+alter table Employee
+drop constraint UQ_EmployeeEamil_1
+
+alter table Employee
+add constraint UQ_EmployeeEmail_1 unique (EmployeeEmail)
+
+insert into Employee(EmployeeLastName,EmployeeFirstName,EmployeeAddress,EmployeeCity,EmployeeZipCode,EmployeeEmail,EmployeeHireDate)
+values('Rouch','Jane','221 Bell St','Nowhere','12345','notarealemail@nowhere.zom','2016-06-15')
+
+Select * from Employee
+
+/* The command below is checking that the EmployeeEmail column's constraint to being unique worked correctly */
+insert into Employee(EmployeeLastName,EmployeeFirstName,EmployeeAddress,EmployeeCity,EmployeeZipCode,EmployeeEmail,EmployeeHireDate)
+values('Rouch_2','Jane_2','221 Bell St_2','Nowhere_2','12346','notarealemail@nowhere.zom','2016-06-20')
