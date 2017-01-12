@@ -1,0 +1,46 @@
+Use MetroAlt
+Go
+
+Select * from Employee
+
+Select EmployeeLastName,EmployeeFirstName,EmployeeEmail from Employee
+
+Select * from Employee order by EmployeeLastName
+
+select * from Employee order by EmployeeHireDate desc
+
+select * from Employee where EmployeeCity=('Seattle')
+
+select * from Employee where EmployeeCity!=('Seattle')
+
+select * from Employee where EmployeePhone is null
+
+select * from Employee where EmployeePhone is not null
+
+select * from Employee where EmployeeLastName like 'c%'
+
+select EmployeeKey,EmployeeHourlyPayRate from EmployeePosition order by EmployeeHourlyPayRate desc
+
+select EmployeeKey,EmployeeHourlyPayRate from EmployeePosition where PositionKey=2
+
+/* Checking the command above to select only form entrys with PositionKey 2 */
+select * from EmployeePosition where PositionKey=2
+
+select top 10 EmployeeKey,EmployeeHourlyPayRate from EmployeePosition where PositionKey=2
+
+/* Selecting top 10 rowa ordered by EmployeeKey */
+select top 10 EmployeeKey,EmployeeHourlyPayRate from EmployeePosition where PositionKey=2
+order by EmployeeKey;
+
+/* Testing that the offset was correctly fetching the data rows */
+select top 30 EmployeeKey,EmployeeHourlyPayRate from EmployeePosition where PositionKey=2
+order by EmployeeKey;
+
+select EmployeeKey,EmployeeHourlyPayRate from EmployeePosition where PositionKey=2
+order by EmployeeKey offset 20 rows fetch next 10 rows only;
+
+select BusDriverShiftKey,BusRouteKey from BusScheduleAssignment
+order by BusDriverShiftKey;
+
+select distinct (BusDriverShiftKey) BusDriverShiftKey,BusRouteKey from BusScheduleAssignment
+order by BusDriverShiftKey;
