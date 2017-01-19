@@ -1,0 +1,145 @@
+Use MetroAlt
+
+-- Question 1
+/* Query returns the year hired and last name of an employee */
+select Year(EmployeeHireDate) as [Year], EmployeeLastName from Employee
+order by [Year] desc, EmployeeLastName
+
+
+--Question 2
+/* Query returns the differents in months between the longest hired employee and the latest */
+select max(EmployeeHireDate) as MaxMonth,
+min(EmployeeHireDate) as MinMonth,
+datediff(MM,min(EmployeeHireDate),max(EmployeeHireDate)) as DiffMonth
+from Employee
+
+-- Question 3
+/* Query returns the employee last name, first name, and phone number */
+select EmployeeLastName, EmployeeFirstName, '('+substring(EmployeePhone,1,3)+')'+
+substring(EmployeePhone,4,3)+'-'+
+substring(EmployeePhone,7,4) as EmployeePhone
+from Employee
+
+
+-- Question 4
+/* Query returns the formatted employee hourly pay rate */
+select format(EmployeeHourlyPayRate,'$ #,##0.00') as EmployeeHourlyPayRate from EmployeePosition
+
+
+-- Question 5
+/* Query returns the employee last name, first name, and date of
+   hire between the years greater than 2013 and less than 2015 */
+select EmployeeLastName, EmployeeFirstName,EmployeeHireDate from Employee
+where 2013 < year(EmployeeHireDate) and year(EmployeeHireDate) < 2015
+
+
+-- Question 6
+/* Query returns the employee paid rate, weekly pay rate, and position name */
+select Position.PositionName,
+format(EmployeePosition.EmployeeHourlyPayRate,'$ #,##0.00') as EmployeeHourlyPayRate,
+format(EmployeePosition.EmployeeHourlyPayRate * 40,'$ #,##0.00') as EmployeeWeeklyPayRate
+from EmployeePosition, Position
+where EmployeePosition.PositionKey=Position.PositionKey
+
+/* Alternate query attempt: returns the employee paid rate, weekly pay rate, and position name */
+select b.PositionName,
+format(a.EmployeeHourlyPayRate,'$ #,##0.00') as EmployeeHourlyPayRate,
+format(a.EmployeeHourlyPayRate * 40,'$ #,##0.00') as EmployeeWeeklyPayRate from EmployeePosition a, Position b
+where a.PositionKey=b.PositionKey
+
+/* Query returns the employee paid rate, weekly pay rate, and position name using INNER JOIN */
+select PositionName, format(EmployeeHourlyPayRate,'$ #,##0.00') as EmployeeHourlyPayRate,
+format(EmployeeHourlyPayRate * 40,'$ #,##0.00') as EmployeeWeeklyPayRate
+from EmployeePosition a
+inner join Position b
+on a.PositionKey=b.PositionKey
+
+-- Question 7
+/* Query returns the highest paid position names */
+select b.PositionName,
+format(max(a.EmployeeHourlyPayRate),'$ #,##0.00') as EmployeeHourlyPayRate
+from EmployeePosition a, Position b
+where a.PositionKey=b.PositionKey
+and EmployeeHourlyPayRate=(select max(a.EmployeeHourlyPayRate) from EmployeePosition a)
+Group by PositionName;
+
+-- Question 8
+/* Query returns the lowest paid position names */
+select b.PositionName,
+format(min(a.EmployeeHourlyPayRate),'$ #,##0.00') as EmployeeHourlyPayRate
+from EmployeePosition a, Position b
+where a.PositionKey=b.PositionKey
+and EmployeeHourlyPayRate=(select min(a.EmployeeHourlyPayRate) from EmployeePosition a)
+Group by PositionName
+
+
+-- Question 9
+/* Query returns the average pay rate of each position name */
+select b.PositionName,
+format(avg(a.EmployeeHourlyPayRate),'$ #,##0.00') as EmployeeHourlyPayRate
+from EmployeePosition a, Position b
+where a.PositionKey=b.PositionKey
+group by PositionName
+
+
+-- Question 10
+/* Query returns the average pay rate by position name */
+select b.PositionName, avg(a.EmployeeHourlyPayRate) as AvgEmployeePay
+from EmployeePosition a, Position b
+where a.PositionKey=b.PositionKey
+group by b.PositionName
+
+
+-- Question 11
+/* Query returns the count of employees hired during each year. */
+select year(EmployeeHireDate) as [Year Hired], count(EmployeeHireDate) as [Number of Employees Hired] from Employee
+group by year(EmployeeHireDate)
+
+
+/* Query returns the count of employees hired during each month of each year. */
+select year(EmployeeHireDate) as [Year Hired], month(EmployeeHireDate) as [Month Hired], count(EmployeeHireDate) as [Number of Employees] from Employee
+group by year(EmployeeHireDate), month(EmployeeHireDate)
+order by [Year Hired]
+
+
+-- Question 12
+select year(EmployeeHireDate) as [Year Hired],
+case month(EmployeeHireDate)
+when 1 then 'January'
+when 2 then 'February'
+when 3 then 'March'
+when 4 then 'April'
+when 5 then 'May'
+when 6 then 'June'
+when 7 then 'July'
+when 8 then 'August'
+when 9 then 'September'
+when 10 then 'October'
+when 11 then 'November'
+when 12 then 'December'
+end as [Month Hired],
+count(EmployeeHireDate) as [Number of Employees]
+from Employee
+group by year(EmployeeHireDate), month(EmployeeHireDate)
+order by [Year Hired]
+
+
+-- Question 13
+select Position.PositionName, format(avg(EmployeeHourlyPayRate), '$ #,##0.00') as EmployeePayRate
+from EmployeePosition
+inner join Position
+on EmployeePosition.PositionKey=Position.PositionKey
+group by PositionName
+having avg(EmployeePosition.EmployeeHourlyPayRate) > 50
+
+
+-- Question 14
+select count(Riders) as [Number of Riders] from Ridership
+
+
+-- Question 15
+select * from MetroAlt.sys.Tables
+
+
+-- Question 16
+select * from sys.Databases
