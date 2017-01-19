@@ -1,0 +1,123 @@
+Use MetroAlt
+
+-- Question 1
+/* Query returns a cross join between the tables Employee,
+   BusShcheduleAssignment, & BusRoute. */
+
+-- USING INNER JOINS
+SELECT PositionName, EmployeeLastName, BusRouteZone
+FROM BusScheduleAssignment BSA
+INNER JOIN Employee E
+ON BSA.EmployeeKey=E.EmployeeKey
+INNER JOIN BusRoute BR
+ON BSA.BusRouteKey=BR.BusRouteKey
+INNER JOIN EmployeePosition EP
+ON E.EmployeeKey=EP.EmployeeKey
+INNER JOIN Position P
+ON EP.PositionKey=P.PositionKey
+
+-- USING CROSS JOINS
+/* Query never finishes running. Must be calculating too large of a table. */
+SELECT PositionName, EmployeeLastName, BusRouteZone
+FROM BusScheduleAssignment BSA
+INNER JOIN Employee E
+ON BSA.EmployeeKey=E.EmployeeKey
+CROSS JOIN BusRoute BR
+CROSS JOIN Position P
+INNER JOIN EmployeePosition EP
+ON E.EmployeeKey=EP.EmployeeKey
+WHERE EP.PositionKey=1
+
+-- Question 2
+/* Query returns a list of all details for
+   buses assigned to bus barn 3. */
+SELECT * FROM BusType BT
+RIGHT JOIN Bus B
+ON BT.BusTypeKey=B.BusTypekey
+LEFT JOIN BusBarn BB
+ON B.BusBarnKey=BB.BusBarnKey
+WHERE BB.BusBarnKey=3
+
+
+-- Question 3
+/* Query returns the sum of costs for all buses assigned
+   to bus barn 3. */
+SELECT format(sum(BustypePurchasePrice), '$ #,##0.00') [Total Cost of Bus Barn 3]
+FROM BusType BT
+RIGHT JOIN Bus B
+ON BT.BusTypeKey=B.BusTypekey
+LEFT JOIN BusBarn BB
+ON B.BusBarnKey=BB.BusBarnKey
+WHERE BB.BusBarnKey=3
+
+
+-- Question 4
+/* Query returns the total cost of each type of bus assigned
+   to bus barn 3. */
+SELECT BusTypeDescription,
+format(sum(BustypePurchasePrice), '$ #,##0.00')
+FROM Bustype BT
+RIGHT JOIN Bus B
+ON BT.BusTypeKey=B.BusTypekey
+LEFT JOIN BusBarn BB
+ON B.BusBarnKey=BB.BusBarnKey
+WHERE BB.BusBarnKey=3
+GROUP BY BusTypeDescription
+
+
+-- Question 5
+/* Query returns the last name, first name, email, position name,
+   and hourly pay for each employee. */
+SELECT EmployeeLastName, EmployeeFirstName,
+EmployeeEmail, format(EmployeeHourlyPayRate, '$ #,##0.00') as [Employee Pay Rate],
+PositionName
+FROM Employee E
+JOIN EmployeePosition EP
+ON E.EmployeeKey=EP.EmployeeKey
+JOIN Position P
+ON EP.PositionKey=P.PositionKey
+
+
+-- Question 6
+/* Query returns the last name, shift times, bus number (key)
+   and bus type for each bus on route 43. */
+SELECT EmployeeLastName, BusDriverShiftStartTime,
+BusDriverShiftStopTime, B.BusKey as BusNumber, BusTypeDescription
+FROM BusScheduleAssignment BSA
+JOIN BusDriverShift BDS
+ON BSA.BusDriverShiftKey=BDS.BusDriverShiftKey
+JOIN Bus B
+ON BSA.BusKey=B.BusKey
+JOIN BusType BT
+ON B.BusTypeKey=BT.BusTypeKey
+JOIN Employee E
+ON BSA.EmployeeKey=E.EmployeeKey
+
+
+-- Question 7
+/* Query returns all positions that no employee holds. */
+SELECT PositionName, EP.PositionKey
+FROM Position P
+LEFT JOIN EmployeePosition EP
+ON P.PositionKey=EP.PositionKey
+WHERE EP.PositionKey IS NULL
+
+
+-- Question 8
+/* Query returns a list of all employees that are drivers and have not been assigned a driving shift */
+SELECT E.EmployeeKey,
+EmployeeFirstName,
+EmployeeLastName,
+PositionName,
+BDS.BusDriverShiftKey
+FROM Employee E
+INNER JOIN EmployeePosition EP
+ON E.EmployeeKey=EP.EmployeeKey
+INNER JOIN Position P
+ON EP.PositionKey=P.PositionKey
+LEFT JOIN BusScheduleAssignment BSA
+ON E.EmployeeKey=BSA.EmployeeKey
+LEFT JOIN BusDriverShift BDS
+ON BSA.BusDriverShiftKey=BDS.BusDriverShiftKey
+WHERE EP.PositionKey=1
+and BSA.BusDriverShiftKey IS NULL
