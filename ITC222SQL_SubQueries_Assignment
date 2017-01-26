@@ -1,0 +1,76 @@
+Use MetroAlt;
+
+-- Question 1
+Select E.EmployeeKey, EmployeeLastName,
+EmployeeFirstName, PositionName,
+EmployeeHourlyPayRate
+From Employee E
+JOIN EmployeePosition EP
+ON E.EmployeeKey = EP.EmployeeKey
+JOIN Position P
+ON EP.PositionKey = P.PositionKey
+WHERE EmployeeHourlyPayRate =
+(Select MAX(EmployeeHourlyPayRate)
+FROM EmployeePosition);
+-- END Question 1
+
+
+-- Question 2
+Select E.EmployeeKey, EmployeeLastName,
+EmployeeFirstName, PositionName
+From Employee E
+JOIN EmployeePosition EP
+ON E.EmployeeKey = EP.EmployeeKey
+JOIN Position P
+ON EP.PositionKey = P.PositionKey
+WHERE PositionName = (Select PositionName
+FROM Position
+WHERE PositionName = 'Manager');
+-- END Question 2
+
+
+-- Question 3
+Select YEAR(BusScheduleAssignmentDate) AS [Year], SUM(Riders) AS [Annual Total],
+AVG(Riders) AS [Annual Average],
+(SELECT SUM(Riders) FROM Ridership) AS Total,
+FORMAT(SUM(Riders) / CAST((SELECT SUM(Riders) FROM Ridership) AS decimal), '##.## %') AS Percentage
+FROM Ridership RS
+JOIN BusScheduleAssignment BSA
+ON RS.BusScheduleAssigmentKey = BSA.BusScheduleAssignmentKey
+GROUP BY YEAR(BusScheduleAssignmentDate)
+ORDER BY [Year] DESC;
+-- END Question 3
+ 
+
+-- Question 4
+CREATE TABLE EmployeeZ
+(
+	EmployeeKey INT IDENTITY(1,1) PRIMARY KEY,
+	EmployeeLastName NVARCHAR(225),
+	EmployeeFirstName NVARCHAR(225),
+	EmployeeEmail NVARCHAR(255),
+);
+
+SET IDENTITY_INSERT EmployeeZ ON
+
+INSERT INTO EmployeeZ(EmployeeKey, EmployeeLastName, EmployeeFirstName, EmployeeEmail)
+SELECT EmployeeKey,
+EmployeeLastName,
+EmployeeFirstName,
+EmployeeEmail
+FROM Employee
+WHERE EmployeeLastName LIKE N'Z%'
+
+SET IDENTITY_INSERT EmployeeZ OFF
+-- END Question 4
+
+
+-- QUestion 5
+SELECT PositionKey, EmployeeKey, EmployeeHourlyPayrate
+FROM EmployeePosition EP1
+WHERE EmployeeHourlyPayRate =
+(SELECT MAX(EmployeeHourlyPayRate)
+FROM EmployeePosition EP2
+WHERE EP1.PositionKey=EP2.PositionKey)
+ORDER BY PositionKey DESC
+-- END Question 5
