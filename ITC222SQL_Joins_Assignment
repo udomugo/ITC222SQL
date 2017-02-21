@@ -28,38 +28,38 @@ INNER JOIN EmployeePosition EP
 ON E.EmployeeKey=EP.EmployeeKey
 WHERE EP.PositionKey=1
 
--- Question 2
+-- Question 2              --= REVISED =--
 /* Query returns a list of all details for
    buses assigned to bus barn 3. */
 SELECT * FROM BusType BT
-RIGHT JOIN Bus B
+JOIN Bus B
 ON BT.BusTypeKey=B.BusTypekey
-LEFT JOIN BusBarn BB
+JOIN BusBarn BB
 ON B.BusBarnKey=BB.BusBarnKey
 WHERE BB.BusBarnKey=3
 
 
--- Question 3
+-- Question 3              --= REVISED =--
 /* Query returns the sum of costs for all buses assigned
    to bus barn 3. */
 SELECT format(sum(BustypePurchasePrice), '$ #,##0.00') [Total Cost of Bus Barn 3]
 FROM BusType BT
-RIGHT JOIN Bus B
+JOIN Bus B
 ON BT.BusTypeKey=B.BusTypekey
-LEFT JOIN BusBarn BB
+JOIN BusBarn BB
 ON B.BusBarnKey=BB.BusBarnKey
 WHERE BB.BusBarnKey=3
 
 
--- Question 4
+-- Question 4              --= REVISED =--
 /* Query returns the total cost of each type of bus assigned
    to bus barn 3. */
 SELECT BusTypeDescription,
 format(sum(BustypePurchasePrice), '$ #,##0.00')
 FROM Bustype BT
-RIGHT JOIN Bus B
+JOIN Bus B
 ON BT.BusTypeKey=B.BusTypekey
-LEFT JOIN BusBarn BB
+JOIN BusBarn BB
 ON B.BusBarnKey=BB.BusBarnKey
 WHERE BB.BusBarnKey=3
 GROUP BY BusTypeDescription
