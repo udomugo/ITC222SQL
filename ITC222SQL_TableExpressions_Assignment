@@ -1,0 +1,189 @@
+USE MetroAlt;
+
+-- Question 1
+SELECT [Position], COUNT([Count]) [Emp Count] FROM
+(SELECT PositionName [Position], EmployeeKey [Count]
+FROM Position p
+INNER JOIN EmployeePosition ep
+ON p.PositionKey = ep.PositionKey) AS Results
+GROUP BY [Position]
+
+-- Question 2
+SELECT HireYear, COUNT([Count]) [Emp Count] FROM
+(SELECT YEAR(EmployeeHireDate) HireYear, e.EmployeeKey [Count]
+FROM Employee e
+INNER JOIN EmployeePosition ep
+ON e.EmployeeKey = ep.EmployeeKey) AS Results
+GROUP BY HireYear
+
+-- Question 3
+WITH Results AS
+(
+SELECT
+PositionName [Position],
+EmployeeKey [Count]
+FROM Position p
+INNER JOIN EmployeePosition ep
+ON p.PositionKey = ep.PositionKey
+)
+SELECT [Position], COUNT([Count]) [Emp Count]
+FROM Results
+GROUP BY [Position]
+
+-- Question 4
+WITH Results AS
+(
+SELECT
+YEAR(EmployeeHireDate) HireYear,
+e.EmployeeKey [Count]
+FROM Employee e
+INNER JOIN EmployeePosition ep
+ON e.EmployeeKey = ep.EmployeeKey
+)
+SELECT HireYear, COUNT([Count]) [Emp Count] FROM Results
+GROUP BY HireYear
+
+-- Question 5
+DECLARE @BusBarn int;
+SET @BusBarn = 3;
+
+WITH BusBarnCount AS
+(
+SELECT
+BusTypeDescription [Bus Model],
+b.BusBarnKey [Count]
+FROM Bus b
+INNER JOIN BusBarn bb
+ON b.BusBarnKey = bb.BusBarnKey
+INNER JOIN BusType bt
+ON b.BusTypeKey = bt.BusTypeKey
+)
+SELECT [Bus Model], COUNT([Count]) [Unit Count], [Count] FROM BusBarnCount
+WHERE [Count] = @BusBarn
+GROUP BY [Bus Model], [Count];
+
+-- Question 6
+GO
+CREATE VIEW cv_HREmployees
+AS
+SELECT
+e.EmployeeKey,
+EmployeeLastName,
+EmployeeFirstName,
+EmployeeAddress,
+EmployeeCity,
+EmployeeZipCode,
+EmployeePhone,
+EmployeeEmail,
+EmployeeHireDate,
+PositionName,
+EmployeeHourlyPayRate
+FROM Employee e
+INNER JOIN EmployeePosition ep
+ON e.EmployeeKey = ep.EmployeeKey
+INNER JOIN Position p
+ON ep.PositionKey = p.PositionKey
+GO
+
+SELECT * FROM cv_HREmployees
+
+-- Question 7
+GO
+ALTER VIEW cv_HREmployees WITH SCHEMABINDING
+AS
+SELECT
+e.EmployeeKey,
+EmployeeLastName,
+EmployeeFirstName,
+EmployeeAddress,
+EmployeeCity,
+EmployeeZipCode,
+EmployeePhone,
+EmployeeEmail,
+EmployeeHireDate,
+PositionName,
+EmployeeHourlyPayRate
+FROM dbo.Employee e
+INNER JOIN dbo.EmployeePosition ep
+ON e.EmployeeKey = ep.EmployeeKey
+INNER JOIN dbo.Position p
+ON ep.PositionKey = p.PositionKey
+GO
+
+SELECT * FROM cv_HREmployees
+
+-- Question 8
+GO
+CREATE VIEW cv_Bus_Schedule
+AS
+SELECT
+EmployeeLastName [Last Name],
+EmployeeFirstName [First Name],
+BusDriverShiftStartTime [Start],
+BusDriverShiftStopTime [End],
+BusRouteKey [Route Number],
+BusKey [Bus Number],
+BusScheduleAssignmentDate
+FROM BusScheduleAssignment bsa
+INNER JOIN BusDriverShift bds
+ON bsa.BusDriverShiftKey = bds.BusDriverShiftKey
+INNER JOIN Employee e
+ON e.EmployeeKey = bsa.EmployeeKey
+GO
+
+-- ALTER
+GO
+ALTER VIEW cv_Bus_Schedule
+AS
+SELECT
+EmployeeLastName [Last Name],
+EmployeeFirstName [First Name],
+BusDriverShiftStartTime [Start],
+BusDriverShiftStopTime [End],
+BusRouteKey [Route Number],
+BusKey [Bus Number],
+BusScheduleAssignmentDate [Date]
+FROM BusScheduleAssignment bsa
+INNER JOIN BusDriverShift bds
+ON bsa.BusDriverShiftKey = bds.BusDriverShiftKey
+INNER JOIN Employee e
+ON e.EmployeeKey = bsa.EmployeeKey
+GO
+--ALTER
+
+SELECT [Last Name], [First Name], [Start], [End], [Route Number], [Bus Number]
+FROM cv_Bus_Schedule
+WHERE MONTH([Date]) = 10 and
+YEAR([Date]) = 2014 and
+[Last Name] = 'Pangle' and
+[First Name] = 'Neil';
+
+-- Question 9
+CREATE FUNCTION fn_EmployeeDemograph
+(@City NVARCHAR(255))
+RETURNS TABLE
+AS
+RETURN
+SELECT
+EmployeeLastName [Last Name],
+EmployeeFirstName [First Name],
+EmployeeCity [City],
+EmployeeHireDate [Date Hired]
+FROM Employee e
+
+ALTER FUNCTION fn_EmployeeDemograph
+(@City NVARCHAR(255))
+RETURNS TABLE
+AS
+RETURN
+SELECT
+EmployeeLastName [Last Name],
+EmployeeFirstName [First Name],
+EmployeeCity [City],
+EmployeeHireDate [Date Hired]
+FROM Employee e
+WHERE EmployeeCity = @City;
+
+SELECT * FROM dbo.fn_EmployeeDemograph('Seattle')
+
+-- Question 10 Omitted
