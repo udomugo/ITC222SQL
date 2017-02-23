@@ -1,1 +1,126 @@
+USE MetroAlt
 
+-- Question 1
+
+SELECT
+PersonLastName
+, PersonFirstName
+, PersonEmail
+, PersonAddressCity
+FROM Community_Assist.dbo.Person p
+INNER JOIN Community_Assist.dbo.PersonAddress pa
+ON p.PersonKey = pa.PersonKey
+UNION
+SELECT
+EmployeeLastName
+, EmployeeFirstName
+, EmployeeEmail
+, EmployeeCity
+FROM Employee e
+
+
+-- Question 2
+
+SELECT
+PersonAddressCity [Cities in Common]
+FROM Community_Assist.dbo.PersonAddress pa
+INTERSECT
+SELECT
+EmployeeCity
+FROM Employee e
+
+
+-- Question 3
+
+SELECT
+PersonAddressCity [Cities Not in Common]
+FROM Community_Assist.dbo.PersonAddress
+EXCEPT
+SELECT
+EmployeeCity
+FROM Employee
+
+
+-- Question 4 NEEDS WORK
+
+INSERT INTO BusService(
+BusServiceName
+, BusServiceDescription)
+VALUES
+('General Maintenance', '1 Hour Labor Time')
+, ('Brake Service', '30 Minute Labor Time')
+, ('Hydraulic Maintenance', '3 Hour Labor Time')
+, ('Mechanical Repair', '2 Hour Labor Time')
+
+INSERT INTO Maintenance(
+MaintenanceDate
+, BusKey)
+VALUES
+(GetDate(), 12)
+, (GetDate()+7, 12)
+, (GetDate()+3, 24)
+
+INSERT INTO MaintenanceDetail(
+MaintenanceKey
+, EmployeeKey
+, id_BusService
+, MaintenanceNotes)
+VALUES
+(1, 60, 1, 'Bus 12 needs to go through a general safety check'),
+(2, 69, 2, 'Looks like Bus 12 is in need of a '),
+(3, 60, 1, 'Bus 24 needs to go through a general safety check')
+
+
+-- Question 5
+
+SELECT e.EmployeeKey
+, EmployeeLastName
+, EmployeeFirstName
+, EmployeeAddress
+, EmployeeCity
+, EmployeeZipCode
+, EmployeePhone
+, EmployeeEmail
+, EmployeeHireDate
+INTO Drivers
+FROM dbo.Employee e
+INNER JOIN dbo.EmployeePosition ep
+ON e.EmployeeKey = ep.EmployeeKey
+WHERE ep.PositionKey = 1;
+
+
+-- Question 6
+
+BEGIN TRAN
+UPDATE Employee
+SET EmployeeFirstName = 'Robert'
+, EmployeeCity = 'Bellevue'
+WHERE EmployeeKey = 3
+
+SELECT * FROM Employee
+
+COMMIT TRAN
+ROLLBACK TRAN
+
+
+-- Question 7
+
+SELECT * FROM EmployeePosition
+
+BEGIN TRANSACTION
+UPDATE EmployeePosition
+SET EmployeeHourlyPayRate = EmployeeHourlyPayRate * 1.03;
+
+COMMIT TRANSACTION
+ROLLBACK TRANSACTION
+
+-- Question 8
+
+SELECT * FROM Position
+
+BEGIN TRANSACTION
+DELETE FROM Position
+WHERE PositionName = 'Detailer'
+
+COMMIT TRANSACTION
+ROLLBACK TRANSACTION
