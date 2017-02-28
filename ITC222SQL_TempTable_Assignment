@@ -1,0 +1,83 @@
+USE MetroAlt
+
+-- Question 1
+CREATE TABLE #TempBusRouteStops
+(
+	BusRouteKey INT NULL
+	, BusStopKey INT NULL
+)
+
+INSERT INTO #TempBusRouteStops(BusRouteKey, BusStopKey)
+SELECT BusRouteKey, BusStopKey
+FROM BusRouteStops
+
+SELECT * FROM #TempBusRouteStops
+
+
+-- Question 2
+CREATE TABLE ##TempGlobalBusRouteStops
+(
+	BusRouteKey INT NULL
+	, BusStopKey INT NULL
+)
+
+INSERT INTO ##TempGlobalBusRouteStops(BusRouteKey, BusStopKey)
+SELECT BusRouteKey, BusStopKey
+FROM BusRouteStops
+
+SELECT * FROM ##TempGlobalBusRouteStops
+
+
+-- Question 3
+CREATE FUNCTION fn_GenEmployEmail
+(
+	@lastname NVARCHAR(255)
+	, @firstname NVARCHAR(255)
+)
+RETURNS NVARCHAR(255)
+AS
+BEGIN
+DECLARE @EmployEmail NVARCHAR(255)
+SET @EmployEmail = LOWER(@firstname) + '.' + LOWER(@lastname) + '@metroalt.com'
+RETURN @EmployEmail
+END
+
+
+SELECT EmployeeLastName, EmployeeFirstName, dbo.fn_GenEmployEmail(EmployeeLastName, EmployeeFirstName) AS [Employee Email]
+FROM Employee
+
+
+-- Question 4
+
+CREATE FUNCTION fn_TwoWeekPayroll
+(
+	@hourlypayrate DECIMAL(5,2)
+)
+RETURNS DECIMAL(8,2)
+AS
+BEGIN
+DECLARE @twoWeekPayroll DECIMAL(8,2)
+SET @twoWeekPayroll = @hourlypayrate * 80
+RETURN @twoWeekPayroll
+END
+
+SELECT EmployeeLastName, EmployeeFirstName, dbo.fn_TwoWeekPayroll(EmployeeHourlyPayRate) AS [Two Week Payroll]
+FROM Employee, EmployeePosition
+
+
+-- Question 5
+CREATE FUNCTION fn_NewEmployPayroll
+(
+	@maxPayRate DECIMAL(5,2)
+	, @minPayRate DECIMAL(5,2)
+	, @positionKey INT
+)
+RETURNS DECIMAL(5,2)
+AS
+BEGIN
+DECLARE @EmployPayRate DECIMAL(5,2)
+SET @maxPayRate = (SELECT MAX(EmployeeHourlyPayRate) FROM EmployeePosition WHERE PositionKey = @positionKey)
+SET @minPayRate = (SELECT MIN(EmployeeHourlyPayRate) FROM EmployeePosition WHERE PositionKey = @positionKey)
+SET @EmployPayrate = @maxPayRate - @minPayRate
+RETURN @EmployPayRate
+END
