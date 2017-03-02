@@ -1,0 +1,192 @@
+Use MetroAlt
+
+-- Question 1
+CREATE PROCEDURE usp_NewEmployee
+@LastName NVARCHAR(255)
+, @FirstName NVARCHAR(255)
+, @Address NVARCHAR(255)
+, @City NVARCHAR(255)
+, @ZipCode NVARCHAR(255)
+, @Phone NCHAR(10)
+, @Position NVARCHAR(255)
+AS
+
+IF NOT EXISTS
+	(SELECT EmployeeKey FROM Employee
+	WHERE EmployeeLastName = @LastName)
+BEGIN
+
+BEGIN TRY
+BEGIN TRAN
+
+INSERT INTO Employee
+(EmployeeLastName
+, EmployeeFirstName
+, EmployeeAddress
+, EmployeeCity
+, EmployeeZipCode
+, EmployeePhone
+, EmployeeEmail
+, EmployeeHireDate)
+VALUES
+(@LastName
+, @FirstName
+, @Address
+, @City
+, @ZipCode
+, @Phone
+, dbo.fn_GenEmployEmail(@LastName, @FirstName)
+, GETDATE());
+
+DECLARE @EmployeeId INT
+SET @EmployeeId = IDENT_CURRENT('Employee')
+
+INSERT INTO EmployeePosition
+(EmployeeKey
+, PositionKey
+, EmployeeHourlyPayRate
+, EmployeePositionDateAssigned)
+VALUES
+(@EmployeeId
+, (SELECT PositionKey FROM Position WHERE PositionName = @Position)
+, dbo.fn_NewEmployPayroll((SELECT MAX(EmployeeHourlyPayRate) FROM EmployeePosition)
+	, (SELECT MIN(EmployeeHourlyPayRate) FROM EmployeePosition)
+	, (SELECT PositionKey FROM Position WHERE PositionName = @Position))
+, GETDATE())
+
+COMMIT TRAN
+END TRY
+BEGIN CATCH
+ROLLBACK TRAN
+PRINT ERROR_MESSAGE()
+RETURN -1
+END CATCH
+END
+ELSE
+BEGIN
+PRINT 'Employee already exists.'
+END
+
+
+-- SQL Statement is a table expresstion to check for successful run of 'usp_NewEmployee' Stored Procedure
+SELECT e.EmployeeKey
+, ep.PositionKey 
+, EmployeeLastName
+, EmployeeFirstName
+, EmployeeAddress
+, EmployeeCity
+, EmployeeZipCode
+, EmployeePhone
+, EmployeeEmail
+, EmployeeHireDate
+, PositionName
+, EmployeeHourlyPayRate
+, EmployeePositionDateAssigned
+FROM Employee e
+INNER JOIN EmployeePosition ep
+ON e.EmployeeKey = ep.EmployeeKey
+INNER JOIN Position p
+ON p.PositionKey = ep.PositionKey
+
+
+-- SQL Statement returns the Max and Min PayRate for all Employee Positions
+SELECT [Position], MAX([Pay]) [Max Pay], MIN([Pay]) [Min Pay] FROM
+(SELECT PositionName [Position], EmployeeHourlyPayRate [Pay]
+FROM Position p
+INNER JOIN EmployeePosition ep
+ON p.PositionKey = ep.PositionKey) AS Results
+GROUP BY [Position]
+
+
+-- SQL Statement invkokes the Stored Procedure 'usp_NewEmployee'
+EXEC usp_NewEmployee
+@LastName = 'Gurney'
+, @FirstName = 'Halic'
+, @Address = '123 Washington Ln'
+, @City = 'Seattle'
+, @ZipCode = '98122'
+, @Phone = '5551234567'
+, @Position = 'Driver'
+
+
+
+-- Question 2
+CREATE PROCEDURE usp_UpdateEmployee
+@EmployeeKey INT
+, @LastName NVARCHAR(255)
+, @FirstName NVARCHAR(255)
+, @Address NVARCHAR(255)
+, @City NVARCHAR(255)
+, @ZipCode NVARCHAR(255)
+AS
+
+IF EXISTS
+	(SELECT EmployeeKey FROM Employee
+	WHERE EmployeeKey = @EmployeeKey)
+
+BEGIN
+
+BEGIN TRY
+BEGIN TRAN
+
+UPDATE Employee
+SET EmployeeLastName = @LastName
+, EmployeeFirstName = @FirstName
+, EmployeeAddress = @Address
+, EmployeeCity = @City
+, EmployeeZipCode = @ZipCode
+WHERE EmployeeKey = @EmployeeKey
+
+COMMIT TRAN
+END TRY
+BEGIN CATCH
+ROLLBACK TRAN
+PRINT ERROR_MESSAGE()
+RETURN -1
+END CATCH
+END
+ELSE
+BEGIN
+PRINT 'Employee does not exist.'
+END
+
+
+-- SQL Statement invkokes the Stored Procedure 'usp_UpdateEmployee'
+EXEC usp_UpdateEmployee
+@EmployeeKey = 509
+, @LastName = 'Gurney'
+, @FirstName = 'Halleck'
+, @Address = 'House Atreides'
+, @City = 'Caladen'
+, @ZipCode = '00000'
+
+
+-- SQL Statement tests the error catching of the Stored Procedure 'usp_UpdateEmployee'
+EXEC usp_UpdateEmployee
+@EmployeeKey = 511
+, @LastName = 'Duncan'
+, @FirstName = 'Idaho'
+, @Address = 'House Atreides'
+, @City = 'Caladen'
+, @ZipCode = '00001'
+
+
+-- SQL Statement is a table expresstion to check for successful run of 'usp_UpdateEmployee' Stored Procedure
+SELECT e.EmployeeKey
+, ep.PositionKey 
+, EmployeeLastName
+, EmployeeFirstName
+, EmployeeAddress
+, EmployeeCity
+, EmployeeZipCode
+, EmployeePhone
+, EmployeeEmail
+, EmployeeHireDate
+, PositionName
+, EmployeeHourlyPayRate
+, EmployeePositionDateAssigned
+FROM Employee e
+INNER JOIN EmployeePosition ep
+ON e.EmployeeKey = ep.EmployeeKey
+INNER JOIN Position p
+ON p.PositionKey = ep.PositionKey
