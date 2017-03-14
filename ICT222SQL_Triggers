@@ -1,0 +1,69 @@
+USE MetroAlt
+
+CREATE TRIGGER tr_EmployeeShift ON BusScheduleAssignment
+INSTEAD OF INSERT
+AS
+
+-- Declaring Variables
+DECLARE @EmployeeShiftCount INT
+DECLARE @EmployeeShiftDate DATE
+DECLARE @EmployeeID INT
+
+SELECT @EmployeeShiftDate = BusScheduleAssignmentDate FROM Inserted
+SELECT @EmployeeShiftCount = COUNT(EmployeeKey) FROM BusScheduleAssignment WHERE BusScheduleAssignmentDate = @EmployeeShiftDate
+SELECT @EmployeeID = EmployeeKey FROM inserted
+
+IF @EmployeeShiftCount < 2
+BEGIN
+	INSERT INTO BusScheduleAssignment(BusDriverShiftKey, EmployeeKey, BusRouteKey,
+	BusScheduleAssignmentDate, BusKey)
+	SELECT BusDriverShiftKey, EmployeeKey, BusRouteKey,
+	BusScheduleAssignmentDate, BusKey
+	FROM Inserted
+END
+
+ELSE
+BEGIN
+	IF NOT EXISTS
+	(SELECT Name FROM sys.Tables WHERE Name = 'EmployeeOvertime')
+	BEGIN
+	CREATE TABLE EmployeeOvertime
+	(
+	BusDriverShiftKey INT
+	, EmployeeKey INT
+	, BusRouteKey INT
+	, BusScheduleAssignmentDate DATE
+	, BusKey INT
+	)
+	END
+
+	INSERT INTO EmployeeOvertime(BusDriverShiftKey, EmployeeKey, BusRouteKey,
+	BusScheduleAssignmentDate, BusKey)
+	SELECT BusDriverShiftKey, EmployeeKey, BusRouteKey,
+	BusScheduleAssignmentDate, BusKey
+	FROM Inserted
+END
+
+-- Lookup and Testing Trigger
+
+SELECT * FROM EmployeeOvertime
+
+SELECT * FROM BusScheduleAssignment WHERE EmployeeKey = 88
+
+SELECT BusDriverShiftKey, BusScheduleAssignmentDate, COUNT(BusDriverShiftKey) [Number of Shifts] FROM BusScheduleAssignment WHERE EmployeeKey = 88 GROUP BY BusDriverShiftKey, BusScheduleAssignmentDate
+
+
+BEGIN TRAN
+INSERT INTO BusScheduleAssignment(BusDriverShiftKey, EmployeeKey, BusRouteKey,
+	BusScheduleAssignmentDate, BusKey)
+	VALUES(1, 509, 126, GETDATE(), 9)
+
+COMMIT TRAN
+
+
+BEGIN TRAN
+INSERT INTO BusScheduleAssignment(BusDriverShiftKey, EmployeeKey, BusRouteKey,
+	BusScheduleAssignmentDate, BusKey)
+	VALUES(3, 88, 120, '2014-12-30', 109)
+
+ROLLBACK TRAN
