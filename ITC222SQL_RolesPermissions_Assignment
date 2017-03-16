@@ -1,0 +1,82 @@
+USE MetroAlt
+
+-- Question 1
+GO
+CREATE SCHEMA ManagementSchema
+
+-- Question 2
+CREATE VIEW ManagementSchema.AnnualRidership
+AS
+SELECT SUM(Riders) [Riders Per Year], YEAR(BusScheduleAssignmentDate) [Year]
+FROM Ridership r
+INNER JOIN BusScheduleAssignment bsa
+ON r.BusScheduleAssigmentKey = bsa.BusScheduleAssignmentKey
+GROUP BY YEAR(BusScheduleAssignmentDate)
+
+CREATE VIEW ManagementSchema.EmployeePayRateByPosition
+AS
+SELECT EmployeeLastName, EmployeeFirstName, EmployeeEmail, PositionName, EmployeeHourlyPayRate
+FROM Employee e
+INNER JOIN EmployeePosition ep
+ON e.EmployeeKey = ep.EmployeeKey
+INNER JOIN Position p
+ON ep.PositionKey = p.PositionKey
+
+
+-- Question 3
+GO
+CREATE ROLE ManagementRole
+
+-- Question 4
+GO
+GRANT SELECT ON SCHEMA::ManagementSchema TO ManagementRole
+GRANT EXEC ON usp_NewEmployee TO ManagementRole
+
+
+-- Question 5
+-- Adding Login 'ckenner'
+CREATE LOGIN ckenner WITH PASSWORD = 'P@ssword!', DEFAULT_DATABASE = MetroAlt;
+
+
+-- Question 6
+-- Creating User 'ckenner' and mapping user to Login 'ckenner'
+CREATE USER ckenner FOR LOGIN ckenner
+
+
+-- Question 7
+-- Adding User to Role 'ManagementRole'
+ALTER ROLE ManagementRole ADD MEMBER ckenner
+
+
+-- Question 8
+-- Setting User 'ckenner' to a default schema 'ManagementRole'
+ALTER USER ckenner WITH DEFAULT_SCHEMA=ManagementSchema
+
+
+-- Searching for Names of Managers
+SELECT EmployeeLastName, EmployeeFirstName, PositionName
+FROM Employee e
+INNER JOIN EmployeePosition ep
+ON e.EmployeeKey = ep.EmployeeHourlyPayRate
+INNER JOIN Position p
+ON ep.PositionKey = p.PositionKey
+WHERE PositionName = 'Manager'
+
+-- Employee Kenner, Carl is a Manager
+
+
+-- Question 9
+SELECT * FROM EmployeePayRateByPosition
+
+-- This ran correctly when logged in as user 'ckenner'
+
+
+-- Question 10
+SELECT * FROM AnnualRidership
+
+-- This ran correctly when logged in as user 'ckenner'
+
+
+-- Question 11
+BACKUP DATABASE MetroAlt
+TO DISK='C:\SQL_BACKUPS\MetroAlt.bak'
